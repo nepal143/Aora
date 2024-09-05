@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Button, Text, PermissionsAndroid, Platform } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, MapEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
 export default function MapsScreen() {
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [location, setLocation] = useState<Coordinates | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -17,22 +22,22 @@ export default function MapsScreen() {
         }
       }
       const loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
+      setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     })();
   }, []);
 
-  const handleSelectLocation = (event) => {
+  const handleSelectLocation = (event: MapEvent) => {
     setLocation(event.nativeEvent.coordinate);
   };
 
   const handleGetCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Permission to access location was denied');
       return;
     }
     const loc = await Location.getCurrentPositionAsync({});
-    setLocation(loc.coords);
+    setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
   };
 
   return (
